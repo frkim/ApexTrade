@@ -169,8 +169,8 @@ class BacktestService:
 
         if position:
             close_price = float(df["close"].iloc[-1])
-            # Calculate unrealized PnL for open position
-            _ = (close_price - position["entry_price"]) * position["quantity"]
+            # Calculate unrealized PnL for open position (value added to capital below)
+            # The PnL calculation is implicit in capital += quantity * close_price
             capital += position["quantity"] * close_price
 
         winning_trades = [t for t in trades if t.pnl and t.pnl > 0]

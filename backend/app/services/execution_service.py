@@ -54,6 +54,7 @@ class ExecutionService:
         await self.db.flush()
 
         try:
+            # Execute trade - methods modify portfolio/positions directly
             if portfolio.is_paper:
                 await self._execute_paper_trade(trade, portfolio, current_price)
             else:
