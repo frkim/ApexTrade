@@ -1,5 +1,6 @@
 """Market data service for fetching data from exchanges."""
 
+import contextlib
 import logging
 from datetime import datetime
 from typing import Any
@@ -28,10 +29,9 @@ class MarketDataService:
                 "enableRateLimit": True,
             }
 
-            if exchange_name == "binance":
-                if settings.BINANCE_API_KEY:
-                    config["apiKey"] = settings.BINANCE_API_KEY
-                    config["secret"] = settings.BINANCE_API_SECRET
+            if exchange_name == "binance" and settings.BINANCE_API_KEY:
+                config["apiKey"] = settings.BINANCE_API_KEY
+                config["secret"] = settings.BINANCE_API_SECRET
 
             self._exchanges[exchange_name] = exchange_class(config)
 
@@ -204,11 +204,9 @@ class MarketDataService:
     async def _close_exchange(self, exchange_name: str) -> None:
         """Close exchange connection."""
         if exchange_name in self._exchanges:
-            try:
+            # Silently ignore errors when closing exchange connections
+            with contextlib.suppress(Exception):
                 await self._exchanges[exchange_name].close()
-            except Exception:
-                # Silently ignore errors when closing exchange connections
-                pass
 
     async def close_all(self) -> None:
         """Close all exchange connections."""

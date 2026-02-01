@@ -43,11 +43,14 @@ class Settings(BaseSettings):
         if hasattr(info, "data") and isinstance(info.data, dict):
             environment = info.data.get("ENVIRONMENT")
 
-        if isinstance(environment, str) and environment.lower() == "production":
-            if v == default_secret:
-                raise ValueError(
-                    "SECRET_KEY environment variable must be set to a secure value in production."
-                )
+        if (
+            isinstance(environment, str)
+            and environment.lower() == "production"
+            and v == default_secret
+        ):
+            raise ValueError(
+                "SECRET_KEY environment variable must be set to a secure value in production."
+            )
         return v
 
     # Database
