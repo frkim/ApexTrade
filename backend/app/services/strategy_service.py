@@ -49,7 +49,7 @@ class StrategyService:
     async def list_active_strategies(self) -> list[Strategy]:
         """List all active strategies."""
         result = await self.db.execute(
-            select(Strategy).where(Strategy.is_active == True)
+            select(Strategy).where(Strategy.is_active.is_(True))
         )
         return list(result.scalars().all())
 

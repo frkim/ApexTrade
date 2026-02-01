@@ -177,7 +177,7 @@ class YFinanceDataProvider:
             return []
 
         try:
-            tickers = yf.Tickers(query)
+            _ = yf.Tickers(query)  # Validate tickers exist
             results = []
 
             for symbol in query.split():

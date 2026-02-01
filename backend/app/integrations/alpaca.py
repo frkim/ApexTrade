@@ -181,8 +181,8 @@ class AlpacaExchange(BaseExchange):
             return {"error": "Alpaca trading client not configured"}
 
         try:
-            from alpaca.trading.requests import MarketOrderRequest, LimitOrderRequest
             from alpaca.trading.enums import OrderSide, TimeInForce
+            from alpaca.trading.requests import LimitOrderRequest, MarketOrderRequest
 
             order_side = OrderSide.BUY if side.lower() == "buy" else OrderSide.SELL
 
@@ -269,8 +269,8 @@ class AlpacaExchange(BaseExchange):
             return []
 
         try:
-            from alpaca.trading.requests import GetOrdersRequest
             from alpaca.trading.enums import QueryOrderStatus
+            from alpaca.trading.requests import GetOrdersRequest
 
             request = GetOrdersRequest(status=QueryOrderStatus.OPEN)
             orders = client.get_orders(request)

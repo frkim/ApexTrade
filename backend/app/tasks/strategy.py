@@ -17,11 +17,13 @@ logger = logging.getLogger(__name__)
 def evaluate_strategy_task(self, strategy_id: str) -> dict[str, Any]:
     """Evaluate a single strategy against current market data."""
     import asyncio
+
     import pandas as pd
 
     async def _evaluate():
         async with async_session_factory() as db:
             from sqlalchemy import select
+
             from app.models.strategy import Strategy
 
             result = await db.execute(

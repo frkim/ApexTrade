@@ -1,7 +1,7 @@
 """Execution service for order execution."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -63,7 +63,7 @@ class ExecutionService:
             trade.status = "filled"
             trade.filled_quantity = trade.quantity
             trade.filled_price = current_price
-            trade.executed_at = datetime.now(timezone.utc)
+            trade.executed_at = datetime.now(UTC)
 
             await self._update_position(portfolio, trade)
 

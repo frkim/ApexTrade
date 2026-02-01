@@ -1,7 +1,7 @@
 """Authentication endpoints."""
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -84,7 +84,7 @@ async def login(
             detail="User account is disabled",
         )
 
-    user.last_login = datetime.now(timezone.utc)
+    user.last_login = datetime.now(UTC)
     await db.flush()
 
     access_token = create_access_token(subject=str(user.id))

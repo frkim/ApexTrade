@@ -1,7 +1,7 @@
 """Backtest service for running backtests."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -54,7 +54,7 @@ class BacktestService:
             results = await self._execute_backtest(backtest, strategy)
 
             backtest.status = "completed"
-            backtest.completed_at = datetime.now(timezone.utc)
+            backtest.completed_at = datetime.now(UTC)
             backtest.final_capital = Decimal(str(results["final_capital"]))
             backtest.total_return = Decimal(str(results["total_return"]))
             backtest.total_trades = results["total_trades"]
