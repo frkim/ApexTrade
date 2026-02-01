@@ -1,7 +1,7 @@
 """Execution service for order execution."""
 
 import logging
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID

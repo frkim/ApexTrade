@@ -1,6 +1,6 @@
 """Security utilities for JWT tokens and password hashing."""
 
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
