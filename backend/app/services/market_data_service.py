@@ -57,13 +57,15 @@ class MarketDataService:
                 if search and search.upper() not in symbol.upper():
                     continue
 
-                symbols.append({
-                    "symbol": symbol,
-                    "base": market.get("base"),
-                    "quote": market.get("quote"),
-                    "exchange": exchange,
-                    "active": market.get("active", True),
-                })
+                symbols.append(
+                    {
+                        "symbol": symbol,
+                        "base": market.get("base"),
+                        "quote": market.get("quote"),
+                        "exchange": exchange,
+                        "active": market.get("active", True),
+                    }
+                )
 
                 if len(symbols) >= limit:
                     break
@@ -105,14 +107,16 @@ class MarketDataService:
                 if end_date and timestamp > end_date:
                     break
 
-                data.append({
-                    "timestamp": timestamp,
-                    "open": candle[1],
-                    "high": candle[2],
-                    "low": candle[3],
-                    "close": candle[4],
-                    "volume": candle[5],
-                })
+                data.append(
+                    {
+                        "timestamp": timestamp,
+                        "open": candle[1],
+                        "high": candle[2],
+                        "low": candle[3],
+                        "close": candle[4],
+                        "volume": candle[5],
+                    }
+                )
 
             return data
 
@@ -140,7 +144,11 @@ class MarketDataService:
                 "high": ticker.get("high"),
                 "low": ticker.get("low"),
                 "volume": ticker.get("baseVolume"),
-                "timestamp": datetime.fromtimestamp(ticker["timestamp"] / 1000) if ticker.get("timestamp") else None,
+                "timestamp": (
+                    datetime.fromtimestamp(ticker["timestamp"] / 1000)
+                    if ticker.get("timestamp")
+                    else None
+                ),
             }
 
         except Exception as e:
@@ -164,7 +172,11 @@ class MarketDataService:
                 "symbol": symbol,
                 "bids": [{"price": b[0], "quantity": b[1]} for b in orderbook.get("bids", [])],
                 "asks": [{"price": a[0], "quantity": a[1]} for a in orderbook.get("asks", [])],
-                "timestamp": datetime.fromtimestamp(orderbook["timestamp"] / 1000) if orderbook.get("timestamp") else None,
+                "timestamp": (
+                    datetime.fromtimestamp(orderbook["timestamp"] / 1000)
+                    if orderbook.get("timestamp")
+                    else None
+                ),
             }
 
         except Exception as e:
@@ -187,7 +199,11 @@ class MarketDataService:
             return [
                 {
                     "id": t.get("id"),
-                    "timestamp": datetime.fromtimestamp(t["timestamp"] / 1000) if t.get("timestamp") else None,
+                    "timestamp": (
+                        datetime.fromtimestamp(t["timestamp"] / 1000)
+                        if t.get("timestamp")
+                        else None
+                    ),
                     "side": t.get("side"),
                     "price": t.get("price"),
                     "amount": t.get("amount"),

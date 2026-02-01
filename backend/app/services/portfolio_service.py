@@ -108,13 +108,12 @@ class PortfolioService:
         )
         positions = list(result.scalars().all())
 
-        positions_value = sum(
-            p.quantity * p.current_price for p in positions
-        )
+        positions_value = sum(p.quantity * p.current_price for p in positions)
         total_value = portfolio.cash_balance + positions_value
         total_pnl = total_value - portfolio.initial_capital
-        total_pnl_percent = (total_pnl / portfolio.initial_capital * 100
-                            if portfolio.initial_capital > 0 else 0)
+        total_pnl_percent = (
+            total_pnl / portfolio.initial_capital * 100 if portfolio.initial_capital > 0 else 0
+        )
 
         return {
             "cash_balance": portfolio.cash_balance,
@@ -145,8 +144,7 @@ class PortfolioService:
 
         if existing:
             total_quantity = existing.quantity + quantity
-            total_cost = (existing.quantity * existing.average_entry_price +
-                         quantity * price)
+            total_cost = existing.quantity * existing.average_entry_price + quantity * price
             existing.average_entry_price = total_cost / total_quantity
             existing.quantity = total_quantity
             existing.current_price = price

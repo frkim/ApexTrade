@@ -24,14 +24,16 @@ def sample_df() -> pd.DataFrame:
         change = (i % 10 - 5) * 0.005
         price = price * (1 + change)
 
-        data.append({
-            "timestamp": base_time + timedelta(hours=i),
-            "open": price * 0.99,
-            "high": price * 1.02,
-            "low": price * 0.98,
-            "close": price,
-            "volume": 1000 + i * 10,
-        })
+        data.append(
+            {
+                "timestamp": base_time + timedelta(hours=i),
+                "open": price * 0.99,
+                "high": price * 1.02,
+                "low": price * 0.98,
+                "close": price,
+                "volume": 1000 + i * 10,
+            }
+        )
 
     df = pd.DataFrame(data)
     df.set_index("timestamp", inplace=True)

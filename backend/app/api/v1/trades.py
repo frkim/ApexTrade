@@ -31,11 +31,7 @@ async def list_trades(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> list[Trade]:
     """List all trades for current user with optional filters."""
-    query = (
-        select(Trade)
-        .join(Portfolio)
-        .where(Portfolio.user_id == current_user.id)
-    )
+    query = select(Trade).join(Portfolio).where(Portfolio.user_id == current_user.id)
 
     if portfolio_id:
         query = query.where(Trade.portfolio_id == portfolio_id)
@@ -64,11 +60,7 @@ async def get_trades_summary(
     end_date: datetime | None = None,
 ) -> dict:
     """Get trade summary statistics."""
-    query = (
-        select(Trade)
-        .join(Portfolio)
-        .where(Portfolio.user_id == current_user.id)
-    )
+    query = select(Trade).join(Portfolio).where(Portfolio.user_id == current_user.id)
 
     if portfolio_id:
         query = query.where(Trade.portfolio_id == portfolio_id)
@@ -128,6 +120,7 @@ async def get_trade(
 
     if not trade:
         from fastapi import HTTPException, status
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Trade not found",

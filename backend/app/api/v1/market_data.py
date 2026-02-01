@@ -69,6 +69,7 @@ async def get_ohlcv(
     except Exception as e:
         logger.error(f"Error fetching OHLCV data: {e}")
         from fastapi import HTTPException, status
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch market data: {str(e)}",
@@ -90,6 +91,7 @@ async def get_ticker(
     except Exception as e:
         logger.error(f"Error fetching ticker: {e}")
         from fastapi import HTTPException, status
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch ticker: {str(e)}",
@@ -116,6 +118,7 @@ async def get_orderbook(
     except Exception as e:
         logger.error(f"Error fetching orderbook: {e}")
         from fastapi import HTTPException, status
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch orderbook: {str(e)}",

@@ -30,9 +30,7 @@ class ExecutionService:
         strategy_id: UUID | None = None,
     ) -> Trade:
         """Execute a market order."""
-        result = await self.db.execute(
-            select(Portfolio).where(Portfolio.id == portfolio_id)
-        )
+        result = await self.db.execute(select(Portfolio).where(Portfolio.id == portfolio_id))
         portfolio = result.scalar_one_or_none()
 
         if not portfolio:
@@ -109,9 +107,7 @@ class ExecutionService:
 
     async def cancel_order(self, trade_id: UUID) -> Trade:
         """Cancel a pending order."""
-        result = await self.db.execute(
-            select(Trade).where(Trade.id == trade_id)
-        )
+        result = await self.db.execute(select(Trade).where(Trade.id == trade_id))
         trade = result.scalar_one_or_none()
 
         if not trade:
@@ -189,8 +185,10 @@ class ExecutionService:
         if trade.side == "buy":
             if position:
                 total_quantity = position.quantity + trade.quantity
-                total_cost = (position.quantity * position.average_entry_price +
-                             trade.quantity * trade.filled_price)
+                total_cost = (
+                    position.quantity * position.average_entry_price
+                    + trade.quantity * trade.filled_price
+                )
                 position.average_entry_price = total_cost / total_quantity
                 position.quantity = total_quantity
                 position.current_price = trade.filled_price
