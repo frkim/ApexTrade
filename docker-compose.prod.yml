@@ -1,0 +1,243 @@
+version: '3.8'
+
+# Production overlay - use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  # =============================================================================
+  # Reverse Proxy - Only exposed port
+  # =============================================================================
+  nginx:
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # =============================================================================
+  # Frontend - Not exposed in production
+  # =============================================================================
+  frontend:
+    restart: always
+    ports: []
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=/api
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # =============================================================================
+  # Backend - Not exposed in production
+  # =============================================================================
+  api:
+    restart: always
+    ports: []
+    environment:
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - TIMESCALE_URL=${TIMESCALE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - ALPACA_API_KEY=${ALPACA_API_KEY}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY}
+      - POLYGON_API_KEY=${POLYGON_API_KEY}
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # =============================================================================
+  # Celery Workers - Production settings
+  # =============================================================================
+  worker-backtest:
+    restart: always
+    command: celery -A app.core.celery_app worker -Q backtest -l warning --concurrency=4
+    environment:
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - TIMESCALE_URL=${TIMESCALE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  worker-strategy:
+    restart: always
+    command: celery -A app.core.celery_app worker -Q strategy -l warning --concurrency=4
+    environment:
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - TIMESCALE_URL=${TIMESCALE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  celery-beat:
+    restart: always
+    command: celery -A app.core.celery_app beat -l warning
+    environment:
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # =============================================================================
+  # Databases - Not exposed in production
+  # =============================================================================
+  postgres:
+    restart: always
+    ports: []
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  timescaledb:
+    restart: always
+    ports: []
+    environment:
+      - POSTGRES_USER=${TIMESCALE_USER}
+      - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
+      - POSTGRES_DB=${TIMESCALE_DB}
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # =============================================================================
+  # Cache & Message Broker - Not exposed in production
+  # =============================================================================
+  redis:
+    restart: always
+    ports: []
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # =============================================================================
+  # Object Storage - Not exposed in production
+  # =============================================================================
+  minio:
+    restart: always
+    ports: []
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # =============================================================================
+  # Monitoring - Not exposed in production (access via VPN/internal network)
+  # =============================================================================
+  prometheus:
+    restart: always
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  grafana:
+    restart: always
+    ports: []
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3001}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
