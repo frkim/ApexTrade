@@ -85,7 +85,11 @@ class BinanceExchange(BaseExchange):
                 "high": ticker.get("high"),
                 "low": ticker.get("low"),
                 "volume": ticker.get("baseVolume"),
-                "timestamp": datetime.fromtimestamp(ticker["timestamp"] / 1000) if ticker.get("timestamp") else None,
+                "timestamp": (
+                    datetime.fromtimestamp(ticker["timestamp"] / 1000)
+                    if ticker.get("timestamp")
+                    else None
+                ),
             }
         except Exception as e:
             logger.error(f"Error fetching ticker: {e}")
@@ -99,7 +103,11 @@ class BinanceExchange(BaseExchange):
                 "symbol": symbol,
                 "bids": orderbook.get("bids", []),
                 "asks": orderbook.get("asks", []),
-                "timestamp": datetime.fromtimestamp(orderbook["timestamp"] / 1000) if orderbook.get("timestamp") else None,
+                "timestamp": (
+                    datetime.fromtimestamp(orderbook["timestamp"] / 1000)
+                    if orderbook.get("timestamp")
+                    else None
+                ),
             }
         except Exception as e:
             logger.error(f"Error fetching orderbook: {e}")
@@ -193,7 +201,11 @@ class BinanceExchange(BaseExchange):
                 "filled": order.get("filled"),
                 "remaining": order.get("remaining"),
                 "status": order.get("status"),
-                "timestamp": datetime.fromtimestamp(order["timestamp"] / 1000) if order.get("timestamp") else None,
+                "timestamp": (
+                    datetime.fromtimestamp(order["timestamp"] / 1000)
+                    if order.get("timestamp")
+                    else None
+                ),
             }
         except Exception as e:
             logger.error(f"Error fetching order: {e}")

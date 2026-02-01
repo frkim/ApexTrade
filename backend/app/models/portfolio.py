@@ -74,9 +74,7 @@ class Portfolio(BaseModel):
     @property
     def total_value(self) -> Decimal:
         """Calculate total portfolio value including positions."""
-        positions_value = sum(
-            p.quantity * p.current_price for p in self.positions
-        )
+        positions_value = sum(p.quantity * p.current_price for p in self.positions)
         return self.cash_balance + positions_value
 
     @property

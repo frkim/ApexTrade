@@ -39,13 +39,15 @@ def sample_ohlcv() -> pd.DataFrame:
     open_price = close + np.random.randn(n) * 0.5
     volume = 1000 + np.random.randint(0, 500, n)
 
-    return pd.DataFrame({
-        "open": open_price,
-        "high": high,
-        "low": low,
-        "close": close,
-        "volume": volume,
-    })
+    return pd.DataFrame(
+        {
+            "open": open_price,
+            "high": high,
+            "low": low,
+            "close": close,
+            "volume": volume,
+        }
+    )
 
 
 class TestSMA:

@@ -26,9 +26,7 @@ def evaluate_strategy_task(self, strategy_id: str) -> dict[str, Any]:
 
             from app.models.strategy import Strategy
 
-            result = await db.execute(
-                select(Strategy).where(Strategy.id == strategy_id)
-            )
+            result = await db.execute(select(Strategy).where(Strategy.id == strategy_id))
             strategy = result.scalar_one_or_none()
 
             if not strategy or not strategy.is_active:
@@ -98,16 +96,20 @@ def evaluate_active_strategies_task() -> dict[str, Any]:
             for strategy in strategies:
                 try:
                     result = evaluate_strategy_task.delay(str(strategy.id))
-                    results.append({
-                        "strategy_id": str(strategy.id),
-                        "task_id": result.id,
-                    })
+                    results.append(
+                        {
+                            "strategy_id": str(strategy.id),
+                            "task_id": result.id,
+                        }
+                    )
                 except Exception as e:
                     logger.error(f"Failed to queue strategy {strategy.id}: {e}")
-                    results.append({
-                        "strategy_id": str(strategy.id),
-                        "error": str(e),
-                    })
+                    results.append(
+                        {
+                            "strategy_id": str(strategy.id),
+                            "error": str(e),
+                        }
+                    )
 
             return {
                 "status": "queued",

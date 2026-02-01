@@ -171,13 +171,15 @@ async def list_positions(
             detail="Portfolio not found",
         )
 
-    result = await db.execute(
-        select(Position).where(Position.portfolio_id == portfolio_id)
-    )
+    result = await db.execute(select(Position).where(Position.portfolio_id == portfolio_id))
     return list(result.scalars().all())
 
 
-@router.post("/{portfolio_id}/positions", response_model=PositionResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{portfolio_id}/positions",
+    response_model=PositionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_position(
     portfolio_id: UUID,
     request: PositionCreate,

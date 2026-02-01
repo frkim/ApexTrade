@@ -20,10 +20,12 @@ class EventBus:
 
     async def publish(self, event_type: str, data: dict[str, Any]) -> None:
         """Publish an event to all subscribers."""
-        message = json.dumps({
-            "type": event_type,
-            "data": data,
-        })
+        message = json.dumps(
+            {
+                "type": event_type,
+                "data": data,
+            }
+        )
 
         if self._local_mode:
             await self._dispatch_local(event_type, data)
@@ -63,9 +65,7 @@ class EventBus:
     async def start_listening(self, *event_types: str) -> None:
         """Start listening for events from Redis."""
         try:
-            pubsub = await redis_client.subscribe(
-                *[f"events:{et}" for et in event_types]
-            )
+            pubsub = await redis_client.subscribe(*[f"events:{et}" for et in event_types])
 
             async for message in pubsub.listen():
                 if message["type"] == "message":

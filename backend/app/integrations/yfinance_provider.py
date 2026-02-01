@@ -20,6 +20,7 @@ class YFinanceDataProvider:
         if self._yf is None:
             try:
                 import yfinance as yf
+
                 self._yf = yf
             except ImportError:
                 logger.warning("yfinance not installed")
@@ -69,7 +70,8 @@ class YFinanceDataProvider:
                 "high": info.get("dayHigh") or info.get("regularMarketDayHigh"),
                 "low": info.get("dayLow") or info.get("regularMarketDayLow"),
                 "volume": info.get("volume") or info.get("regularMarketVolume"),
-                "previous_close": info.get("previousClose") or info.get("regularMarketPreviousClose"),
+                "previous_close": info.get("previousClose")
+                or info.get("regularMarketPreviousClose"),
             }
         except Exception as e:
             logger.error(f"Error fetching quote: {e}")
@@ -185,12 +187,14 @@ class YFinanceDataProvider:
                     ticker = yf.Ticker(symbol)
                     info = ticker.info
                     if info.get("symbol"):
-                        results.append({
-                            "symbol": info.get("symbol"),
-                            "name": info.get("shortName") or info.get("longName"),
-                            "exchange": info.get("exchange"),
-                            "type": info.get("quoteType"),
-                        })
+                        results.append(
+                            {
+                                "symbol": info.get("symbol"),
+                                "name": info.get("shortName") or info.get("longName"),
+                                "exchange": info.get("exchange"),
+                                "type": info.get("quoteType"),
+                            }
+                        )
                 except Exception:
                     # Skip symbols that fail to fetch (may not exist)
                     pass

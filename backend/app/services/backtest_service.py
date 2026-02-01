@@ -30,17 +30,13 @@ class BacktestService:
         if not self.db:
             raise RuntimeError("Database session required")
 
-        result = await self.db.execute(
-            select(Backtest).where(Backtest.id == backtest_id)
-        )
+        result = await self.db.execute(select(Backtest).where(Backtest.id == backtest_id))
         backtest = result.scalar_one_or_none()
 
         if not backtest:
             raise ValueError(f"Backtest not found: {backtest_id}")
 
-        result = await self.db.execute(
-            select(Strategy).where(Strategy.id == backtest.strategy_id)
-        )
+        result = await self.db.execute(select(Strategy).where(Strategy.id == backtest.strategy_id))
         strategy = result.scalar_one_or_none()
 
         if not strategy:
@@ -106,15 +102,21 @@ class BacktestService:
                 timestamp = df.index[i]
                 close_price = float(df["close"].iloc[i])
 
-                equity_curve.append({
-                    "timestamp": timestamp.isoformat() if hasattr(timestamp, 'isoformat') else str(timestamp),
-                    "equity": capital + (position["quantity"] * close_price if position else 0),
-                })
+                equity_curve.append(
+                    {
+                        "timestamp": (
+                            timestamp.isoformat()
+                            if hasattr(timestamp, "isoformat")
+                            else str(timestamp)
+                        ),
+                        "equity": capital + (position["quantity"] * close_price if position else 0),
+                    }
+                )
 
                 if position is None:
                     entry_signal = self.rule_engine.evaluate_rules(
                         strategy.rules,
-                        df.iloc[:i+1],
+                        df.iloc[: i + 1],
                         -1,
                     )
 
@@ -135,7 +137,7 @@ class BacktestService:
                     if exit_rules:
                         exit_signal = self.rule_engine.evaluate_exit_rules(
                             exit_rules,
-                            df.iloc[:i+1],
+                            df.iloc[: i + 1],
                             -1,
                         )
 
@@ -258,14 +260,15 @@ class BacktestService:
 
         returns = []
         for i in range(1, len(equities)):
-            if equities[i-1] > 0:
-                ret = (equities[i] - equities[i-1]) / equities[i-1]
+            if equities[i - 1] > 0:
+                ret = (equities[i] - equities[i - 1]) / equities[i - 1]
                 returns.append(ret)
 
         if not returns:
             return 0.0
 
         import numpy as np
+
         mean_return = np.mean(returns)
         std_return = np.std(returns)
 

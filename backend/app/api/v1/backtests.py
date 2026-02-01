@@ -27,11 +27,7 @@ async def list_backtests(
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> list[Backtest]:
     """List all backtests for current user."""
-    query = (
-        select(Backtest)
-        .join(Strategy)
-        .where(Strategy.user_id == current_user.id)
-    )
+    query = select(Backtest).join(Strategy).where(Strategy.user_id == current_user.id)
 
     if strategy_id:
         query = query.where(Backtest.strategy_id == strategy_id)

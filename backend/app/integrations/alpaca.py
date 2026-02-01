@@ -37,6 +37,7 @@ class AlpacaExchange(BaseExchange):
         if self._trading_client is None:
             try:
                 from alpaca.trading.client import TradingClient
+
                 self._trading_client = TradingClient(
                     api_key=self.api_key,
                     secret_key=self.api_secret,
@@ -52,6 +53,7 @@ class AlpacaExchange(BaseExchange):
         if self._data_client is None:
             try:
                 from alpaca.data.historical import StockHistoricalDataClient
+
                 self._data_client = StockHistoricalDataClient(
                     api_key=self.api_key,
                     secret_key=self.api_secret,
@@ -88,6 +90,7 @@ class AlpacaExchange(BaseExchange):
 
         try:
             from alpaca.data.requests import StockLatestQuoteRequest
+
             request = StockLatestQuoteRequest(symbol_or_symbols=symbol)
             quote = client.get_stock_latest_quote(request)
 
@@ -278,14 +281,16 @@ class AlpacaExchange(BaseExchange):
             result = []
             for o in orders:
                 if symbol is None or o.symbol == symbol:
-                    result.append({
-                        "order_id": str(o.id),
-                        "symbol": o.symbol,
-                        "side": str(o.side),
-                        "type": str(o.type),
-                        "quantity": float(o.qty) if o.qty else None,
-                        "status": str(o.status),
-                    })
+                    result.append(
+                        {
+                            "order_id": str(o.id),
+                            "symbol": o.symbol,
+                            "side": str(o.side),
+                            "type": str(o.type),
+                            "quantity": float(o.qty) if o.qty else None,
+                            "status": str(o.status),
+                        }
+                    )
 
             return result
         except Exception as e:
@@ -304,15 +309,17 @@ class AlpacaExchange(BaseExchange):
             result = []
             for p in positions:
                 if symbol is None or p.symbol == symbol:
-                    result.append({
-                        "symbol": p.symbol,
-                        "side": "long" if float(p.qty) > 0 else "short",
-                        "quantity": abs(float(p.qty)),
-                        "entry_price": float(p.avg_entry_price),
-                        "current_price": float(p.current_price),
-                        "unrealized_pnl": float(p.unrealized_pl),
-                        "unrealized_pnl_percent": float(p.unrealized_plpc) * 100,
-                    })
+                    result.append(
+                        {
+                            "symbol": p.symbol,
+                            "side": "long" if float(p.qty) > 0 else "short",
+                            "quantity": abs(float(p.qty)),
+                            "entry_price": float(p.avg_entry_price),
+                            "current_price": float(p.current_price),
+                            "unrealized_pnl": float(p.unrealized_pl),
+                            "unrealized_pnl_percent": float(p.unrealized_plpc) * 100,
+                        }
+                    )
 
             return result
         except Exception as e:
