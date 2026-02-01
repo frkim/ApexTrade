@@ -4,43 +4,48 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StrategyCard } from '@/components/dashboard/strategy-card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Strategy } from '@/types/strategy'
 
-// Mock data
+// Mock data aligned with backend StrategyResponse
 const mockStrategies: Strategy[] = [
   {
     id: '1',
     name: 'BTC Momentum',
     description: 'RSI-based momentum strategy for Bitcoin',
-    symbol: 'BTCUSDT',
+    symbols: ['BTCUSDT'],
     timeframe: '4h',
-    status: 'active',
-    rules: [],
-    createdAt: '2024-01-15T00:00:00Z',
-    updatedAt: '2024-03-01T00:00:00Z',
+    is_active: true,
+    is_paper: true,
+    user_id: 'user-1',
+    rules: {},
+    created_at: '2024-01-15T00:00:00Z',
+    updated_at: '2024-03-01T00:00:00Z',
   },
   {
     id: '2',
     name: 'ETH Mean Reversion',
     description: 'Bollinger Bands mean reversion for Ethereum',
-    symbol: 'ETHUSDT',
+    symbols: ['ETHUSDT'],
     timeframe: '1h',
-    status: 'paused',
-    rules: [],
-    createdAt: '2024-02-01T00:00:00Z',
-    updatedAt: '2024-03-01T00:00:00Z',
+    is_active: false,
+    is_paper: true,
+    user_id: 'user-1',
+    rules: {},
+    created_at: '2024-02-01T00:00:00Z',
+    updated_at: '2024-03-01T00:00:00Z',
   },
   {
     id: '3',
     name: 'SOL Breakout',
     description: 'Breakout strategy with volume confirmation',
-    symbol: 'SOLUSDT',
+    symbols: ['SOLUSDT'],
     timeframe: '15m',
-    status: 'draft',
-    rules: [],
-    createdAt: '2024-03-01T00:00:00Z',
-    updatedAt: '2024-03-01T00:00:00Z',
+    is_active: false,
+    is_paper: true,
+    user_id: 'user-1',
+    rules: {},
+    created_at: '2024-03-01T00:00:00Z',
+    updated_at: '2024-03-01T00:00:00Z',
   },
 ]
 

@@ -1,7 +1,6 @@
 """Portfolio endpoints."""
 
 import logging
-from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 

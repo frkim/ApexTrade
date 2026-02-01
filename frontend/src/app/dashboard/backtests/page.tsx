@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -11,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatCurrency, formatPercent, formatDateTime } from '@/lib/utils'
+import { formatPercent, formatDateTime } from '@/lib/utils'
 import { BacktestResult } from '@/types/trade'
 
 // Mock data

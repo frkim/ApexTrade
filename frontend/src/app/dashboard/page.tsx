@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MetricsCard } from '@/components/dashboard/metrics-card'
 import { RecentTrades } from '@/components/dashboard/recent-trades'
 import { EquityCurve } from '@/components/charts/equity-curve'
-import { Skeleton } from '@/components/ui/skeleton'
 import { formatCurrency } from '@/lib/utils'
 
 // Mock data for demonstration

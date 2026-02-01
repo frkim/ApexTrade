@@ -4,7 +4,6 @@ import logging
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
-from uuid import UUID
 
 import pandas as pd
 from sqlalchemy import select
@@ -170,7 +169,8 @@ class BacktestService:
 
         if position:
             close_price = float(df["close"].iloc[-1])
-            pnl = (close_price - position["entry_price"]) * position["quantity"]
+            # Calculate unrealized PnL for open position
+            _ = (close_price - position["entry_price"]) * position["quantity"]
             capital += position["quantity"] * close_price
 
         winning_trades = [t for t in trades if t.pnl and t.pnl > 0]

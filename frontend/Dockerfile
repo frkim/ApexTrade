@@ -3,14 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm with pinned version for reproducible builds
+RUN corepack enable && corepack prepare pnpm@8.15.4 --activate
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (without lockfile since we use npm in dev)
+RUN pnpm install
 
 # Copy source files
 COPY . .

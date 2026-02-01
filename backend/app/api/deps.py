@@ -1,6 +1,7 @@
 """Dependency injection utilities."""
 
 import logging
+import uuid
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
@@ -46,10 +47,16 @@ async def get_current_user(
     if payload is None:
         raise credentials_exception
 
-    user_id: str | None = payload.get("sub")
+    user_id_str: str | None = payload.get("sub")
     token_type: str | None = payload.get("type")
 
-    if user_id is None or token_type != "access":
+    if user_id_str is None or token_type != "access":
+        raise credentials_exception
+
+    # Convert string to UUID
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except (ValueError, TypeError):
         raise credentials_exception
 
     result = await db.execute(select(User).where(User.id == user_id))

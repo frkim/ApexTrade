@@ -10,7 +10,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.portfolio import Portfolio, Position
-from app.models.strategy import Strategy
 from app.models.trade import Trade
 
 logger = logging.getLogger(__name__)
@@ -56,9 +55,9 @@ class ExecutionService:
 
         try:
             if portfolio.is_paper:
-                result = await self._execute_paper_trade(trade, portfolio, current_price)
+                await self._execute_paper_trade(trade, portfolio, current_price)
             else:
-                result = await self._execute_live_trade(trade, portfolio)
+                await self._execute_live_trade(trade, portfolio)
 
             trade.status = "filled"
             trade.filled_quantity = trade.quantity

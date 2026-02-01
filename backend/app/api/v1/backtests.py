@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
-from app.models.backtest import Backtest, BacktestTrade
+from app.models.backtest import Backtest
 from app.models.strategy import Strategy
 from app.schemas.backtest import BacktestCreate, BacktestResponse, BacktestResult
 from app.tasks.backtest import run_backtest_task

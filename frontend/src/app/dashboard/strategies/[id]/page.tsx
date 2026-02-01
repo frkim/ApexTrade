@@ -9,44 +9,32 @@ import { Badge } from '@/components/ui/badge'
 import { StrategyForm } from '@/components/forms/strategy-form'
 import { EquityCurve } from '@/components/charts/equity-curve'
 import { formatPercent, formatDate } from '@/lib/utils'
-import { Strategy, StrategyStatus } from '@/types/strategy'
+import { Strategy } from '@/types/strategy'
 
-const statusConfig: Record<StrategyStatus, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'secondary' }> = {
-  draft: { label: 'Draft', variant: 'secondary' },
-  active: { label: 'Active', variant: 'success' },
-  paused: { label: 'Paused', variant: 'warning' },
-  stopped: { label: 'Stopped', variant: 'secondary' },
-  error: { label: 'Error', variant: 'destructive' },
-}
-
-// Mock data
+// Mock data aligned with backend StrategyResponse
 const mockStrategy: Strategy = {
   id: '1',
   name: 'BTC Momentum',
   description: 'RSI-based momentum strategy for Bitcoin',
-  symbol: 'BTCUSDT',
+  symbols: ['BTCUSDT'],
   timeframe: '4h',
-  status: 'active',
-  rules: [
-    {
-      id: 'r1',
-      name: 'Buy Signal',
-      action: 'buy',
-      conditions: [
-        {
-          id: 'c1',
-          indicator: { type: 'rsi', period: 14 },
-          operator: 'less_than',
-          value: 30,
-        },
-      ],
-      conditionLogic: 'and',
-      positionSize: 10,
-      positionSizeType: 'percent',
-    },
+  is_active: true,
+  is_paper: true,
+  user_id: 'user-1',
+  rules: {
+    conditions: [
+      { indicator: 'rsi_14', operator: 'lt', value: 30 },
+    ],
+    logic: 'and',
+  },
+  entry_rules: [
+    { indicator: 'rsi_14', operator: 'lt', value: 30 },
   ],
-  createdAt: '2024-01-15T00:00:00Z',
-  updatedAt: '2024-03-01T00:00:00Z',
+  exit_rules: [
+    { indicator: 'rsi_14', operator: 'gt', value: 70 },
+  ],
+  created_at: '2024-01-15T00:00:00Z',
+  updated_at: '2024-03-01T00:00:00Z',
 }
 
 const mockPerformance = {
@@ -71,9 +59,10 @@ const mockEquityData = [
 
 export default function StrategyDetailPage() {
   const params = useParams()
-  const id = params.id as string
   const strategy = mockStrategy
-  const status = statusConfig[strategy.status]
+  const statusDisplay = strategy.is_active
+    ? { label: 'Active', variant: 'success' as const }
+    : { label: 'Inactive', variant: 'secondary' as const }
 
   return (
     <div className="space-y-6">
@@ -86,20 +75,20 @@ export default function StrategyDetailPage() {
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold">{strategy.name}</h1>
-            <Badge variant={status.variant}>{status.label}</Badge>
+            <Badge variant={statusDisplay.variant}>{statusDisplay.label}</Badge>
           </div>
           <p className="text-muted-foreground">
-            {strategy.symbol} • {strategy.timeframe} • Created {formatDate(strategy.createdAt)}
+            {strategy.symbols.join(', ')} • {strategy.timeframe} • Created {formatDate(strategy.created_at)}
           </p>
         </div>
         <div className="flex gap-2">
-          {strategy.status === 'active' && (
+          {strategy.is_active && (
             <Button variant="outline">
               <Pause className="mr-2 h-4 w-4" />
               Pause
             </Button>
           )}
-          {(strategy.status === 'draft' || strategy.status === 'paused') && (
+          {!strategy.is_active && (
             <Button variant="outline">
               <Play className="mr-2 h-4 w-4" />
               Activate

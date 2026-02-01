@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPercent } from '@/lib/utils'
-import { Strategy, StrategyStatus } from '@/types/strategy'
+import { Strategy } from '@/types/strategy'
 
 interface StrategyCardProps {
   strategy: Strategy
@@ -17,16 +17,16 @@ interface StrategyCardProps {
   onPause?: (id: string) => void
 }
 
-const statusConfig: Record<StrategyStatus, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'secondary' }> = {
-  draft: { label: 'Draft', variant: 'secondary' },
-  active: { label: 'Active', variant: 'success' },
-  paused: { label: 'Paused', variant: 'warning' },
-  stopped: { label: 'Stopped', variant: 'secondary' },
-  error: { label: 'Error', variant: 'destructive' },
+// Get display status from is_active flag
+function getStatusDisplay(isActive: boolean): { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'secondary' } {
+  return isActive
+    ? { label: 'Active', variant: 'success' }
+    : { label: 'Inactive', variant: 'secondary' }
 }
 
 export function StrategyCard({ strategy, performance, onActivate, onPause }: StrategyCardProps) {
-  const status = statusConfig[strategy.status]
+  const status = getStatusDisplay(strategy.is_active)
+  const symbolDisplay = strategy.symbols.join(', ')
 
   return (
     <Card>
@@ -36,7 +36,7 @@ export function StrategyCard({ strategy, performance, onActivate, onPause }: Str
             <CardTitle className="hover:text-primary">{strategy.name}</CardTitle>
           </Link>
           <CardDescription className="mt-1">
-            {strategy.symbol} • {strategy.timeframe}
+            {symbolDisplay} • {strategy.timeframe}
           </CardDescription>
         </div>
         <Badge variant={status.variant}>{status.label}</Badge>
@@ -66,22 +66,16 @@ export function StrategyCard({ strategy, performance, onActivate, onPause }: Str
         )}
 
         <div className="mt-4 flex gap-2">
-          {strategy.status === 'active' && onPause && (
+          {strategy.is_active && onPause && (
             <Button variant="outline" size="sm" onClick={() => onPause(strategy.id)}>
               <Pause className="mr-1 h-4 w-4" />
               Pause
             </Button>
           )}
-          {(strategy.status === 'draft' || strategy.status === 'paused') && onActivate && (
+          {!strategy.is_active && onActivate && (
             <Button variant="outline" size="sm" onClick={() => onActivate(strategy.id)}>
               <Play className="mr-1 h-4 w-4" />
               Activate
-            </Button>
-          )}
-          {strategy.status === 'error' && (
-            <Button variant="outline" size="sm" className="text-destructive">
-              <AlertCircle className="mr-1 h-4 w-4" />
-              View Error
             </Button>
           )}
         </div>

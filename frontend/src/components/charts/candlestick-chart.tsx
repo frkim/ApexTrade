@@ -9,7 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from 'recharts'
 import { formatDate } from '@/lib/utils'
 import { CHART_COLORS } from '@/lib/constants'

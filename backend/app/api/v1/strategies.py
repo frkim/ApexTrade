@@ -6,7 +6,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
 from app.models.strategy import Strategy

@@ -1,7 +1,6 @@
 """Base exchange abstract class."""
 
 from abc import ABC, abstractmethod
-from decimal import Decimal
 from typing import Any
 
 

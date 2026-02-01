@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, Menu, Moon, Sun, User, LogOut, Settings } from 'lucide-react'
+import { Bell, Menu, Sun, LogOut, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -45,7 +45,7 @@ export function Header() {
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                  {user?.username?.[0]?.toUpperCase() || user?.full_name?.[0]?.toUpperCase() || 'U'}
                 </div>
               </Button>
             </DialogTrigger>
@@ -56,10 +56,10 @@ export function Header() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg text-primary-foreground">
-                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                    {user?.username?.[0]?.toUpperCase() || user?.full_name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <p className="font-medium">{user?.name || 'User'}</p>
+                    <p className="font-medium">{user?.full_name || user?.username || 'User'}</p>
                     <p className="text-sm text-muted-foreground">{user?.email}</p>
                   </div>
                 </div>

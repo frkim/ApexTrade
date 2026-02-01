@@ -6,7 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from app.api.deps import CurrentUser, DbSession
+from app.api.deps import CurrentUser
 from app.schemas.market_data import OHLCVResponse, SymbolResponse
 from app.services.market_data_service import MarketDataService
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
-import { formatCurrency, formatPercent } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { CHART_COLORS } from '@/lib/constants'
 
 interface AllocationData {

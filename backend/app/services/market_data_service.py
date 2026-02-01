@@ -207,6 +207,7 @@ class MarketDataService:
             try:
                 await self._exchanges[exchange_name].close()
             except Exception:
+                # Silently ignore errors when closing exchange connections
                 pass
 
     async def close_all(self) -> None:

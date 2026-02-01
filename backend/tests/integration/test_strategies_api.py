@@ -2,10 +2,6 @@
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.models.strategy import Strategy
-from app.models.user import User
 
 
 class TestStrategiesAPI:

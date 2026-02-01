@@ -3,13 +3,21 @@ import { persist } from 'zustand/middleware'
 import { User } from '@/types/user'
 import { api } from '@/lib/api'
 
+// Response types matching backend
+interface TokenResponse {
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+}
+
 interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
+  register: (username: string, email: string, password: string, fullName?: string) => Promise<void>
   logout: () => void
   setUser: (user: User) => void
   checkAuth: () => Promise<void>
@@ -17,35 +25,48 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
       isLoading: true,
 
       login: async (email: string, password: string) => {
-        const response = await api.post<{ user: User; token: string }>('/api/auth/login', {
+        const response = await api.post<TokenResponse>('/api/v1/auth/login', {
           email,
           password,
         })
-        localStorage.setItem('auth_token', response.token)
+        localStorage.setItem('auth_token', response.access_token)
+        
+        // Fetch user info after login
+        const user = await api.get<User>('/api/v1/auth/me')
         set({
-          user: response.user,
-          token: response.token,
+          user,
+          token: response.access_token,
           isAuthenticated: true,
         })
       },
 
-      register: async (name: string, email: string, password: string) => {
-        const response = await api.post<{ user: User; token: string }>('/api/auth/register', {
-          name,
+      register: async (username: string, email: string, password: string, fullName?: string) => {
+        // Register creates user but doesn't return token
+        await api.post('/api/v1/auth/register', {
+          username,
+          email,
+          password,
+          full_name: fullName,
+        })
+        
+        // Login after successful registration
+        const response = await api.post<TokenResponse>('/api/v1/auth/login', {
           email,
           password,
         })
-        localStorage.setItem('auth_token', response.token)
+        localStorage.setItem('auth_token', response.access_token)
+        
+        const user = await api.get<User>('/api/v1/auth/me')
         set({
-          user: response.user,
-          token: response.token,
+          user,
+          token: response.access_token,
           isAuthenticated: true,
         })
       },
@@ -71,7 +92,7 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          const user = await api.get<User>('/api/auth/me')
+          const user = await api.get<User>('/api/v1/auth/me')
           set({ user, token, isAuthenticated: true, isLoading: false })
         } catch {
           localStorage.removeItem('auth_token')

@@ -1,6 +1,9 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 export const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
 
+// API version prefix - all API calls should use this
+export const API_V1_PREFIX = '/api/v1'
+
 export const TIMEFRAMES = [
   { value: '1m', label: '1 Minute' },
   { value: '5m', label: '5 Minutes' },
@@ -23,9 +26,11 @@ export const INDICATORS = [
 ] as const
 
 export const OPERATORS = [
-  { value: 'greater_than', label: 'Greater Than (>)' },
-  { value: 'less_than', label: 'Less Than (<)' },
-  { value: 'equals', label: 'Equals (=)' },
+  { value: 'gt', label: 'Greater Than (>)' },
+  { value: 'lt', label: 'Less Than (<)' },
+  { value: 'eq', label: 'Equals (=)' },
+  { value: 'gte', label: 'Greater or Equal (>=)' },
+  { value: 'lte', label: 'Less or Equal (<=)' },
   { value: 'crosses_above', label: 'Crosses Above' },
   { value: 'crosses_below', label: 'Crosses Below' },
 ] as const

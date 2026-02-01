@@ -32,6 +32,24 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ALGORITHM: str = "HS256"
 
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def validate_secret_key(cls, v: str, info: Any) -> str:
+        """Ensure that the insecure default SECRET_KEY is never used in production."""
+        default_secret = "your-secret-key-change-in-production"
+
+        # Get ENVIRONMENT from validated data if available
+        environment = None
+        if hasattr(info, "data") and isinstance(info.data, dict):
+            environment = info.data.get("ENVIRONMENT")
+
+        if isinstance(environment, str) and environment.lower() == "production":
+            if v == default_secret:
+                raise ValueError(
+                    "SECRET_KEY environment variable must be set to a secure value in production."
+                )
+        return v
+
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/apextrade"
 

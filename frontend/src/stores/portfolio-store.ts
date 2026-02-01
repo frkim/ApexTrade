@@ -22,7 +22,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   fetchPortfolios: async () => {
     set({ isLoading: true, error: null })
     try {
-      const portfolios = await api.get<PortfolioSummary[]>('/api/portfolios')
+      const portfolios = await api.get<PortfolioSummary[]>('/api/v1/portfolios')
       set({ portfolios, isLoading: false })
     } catch (error) {
       set({
@@ -35,7 +35,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   fetchPortfolio: async (id: string) => {
     set({ isLoading: true, error: null })
     try {
-      const portfolio = await api.get<Portfolio>(`/api/portfolios/${id}`)
+      const portfolio = await api.get<Portfolio>(`/api/v1/portfolios/${id}`)
       set({ selectedPortfolio: portfolio, isLoading: false })
     } catch (error) {
       set({

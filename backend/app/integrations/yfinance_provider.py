@@ -192,6 +192,7 @@ class YFinanceDataProvider:
                             "type": info.get("quoteType"),
                         })
                 except Exception:
+                    # Skip symbols that fail to fetch (may not exist)
                     pass
 
                 if len(results) >= limit:

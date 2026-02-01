@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { Trade, TradeStatus, TradeSide } from '@/types/trade'
+import { Trade, TradeStatus } from '@/types/trade'
 
 interface RecentTradesProps {
   trades: Trade[]

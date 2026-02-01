@@ -1,9 +1,11 @@
 export type StrategyStatus = 'draft' | 'active' | 'paused' | 'stopped' | 'error'
 
 export type ConditionOperator =
-  | 'greater_than'
-  | 'less_than'
-  | 'equals'
+  | 'gt'
+  | 'lt'
+  | 'eq'
+  | 'gte'
+  | 'lte'
   | 'crosses_above'
   | 'crosses_below'
 
@@ -18,40 +20,39 @@ export type IndicatorType =
   | 'price'
 
 export interface IndicatorConfig {
-  type: IndicatorType
-  period?: number
-  source?: 'open' | 'high' | 'low' | 'close'
+  name: string
   params?: Record<string, number | string>
 }
 
 export interface RuleCondition {
-  id: string
-  indicator: IndicatorConfig
+  indicator: string
   operator: ConditionOperator
-  value: number | IndicatorConfig
+  value: number | string
+  timeframe?: string
 }
 
-export interface Rule {
-  id: string
-  name: string
-  action: 'buy' | 'sell'
+export interface RuleDefinition {
+  name?: string
   conditions: RuleCondition[]
-  conditionLogic: 'and' | 'or'
-  positionSize: number
-  positionSizeType: 'percent' | 'fixed'
+  logic: 'and' | 'or'
+  indicators?: IndicatorConfig[]
 }
 
+// Strategy type aligned with backend StrategyResponse schema
 export interface Strategy {
   id: string
   name: string
   description?: string
-  symbol: string
+  symbols: string[]
   timeframe: string
-  status: StrategyStatus
-  rules: Rule[]
-  createdAt: string
-  updatedAt: string
-  portfolioId?: string
+  rules: Record<string, unknown>
+  entry_rules?: Record<string, unknown>[]
+  exit_rules?: Record<string, unknown>[]
+  is_active: boolean
+  is_paper: boolean
+  user_id: string
+  created_at: string
+  updated_at: string
 }
 
 export interface StrategyPerformance {

@@ -1,9 +1,13 @@
+// User type aligned with backend UserResponse schema
 export interface User {
   id: string
   email: string
-  name: string
-  createdAt: string
-  updatedAt: string
+  username: string
+  full_name: string | null
+  is_active: boolean
+  is_verified: boolean
+  created_at: string
+  last_login: string | null
 }
 
 export interface UserSettings {

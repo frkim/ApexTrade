@@ -1,10 +1,10 @@
 """Authentication endpoints."""
 
 import logging
-from datetime import UTC, datetime, timedelta, timezone
-from typing import Annotated
+import uuid
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbSession
@@ -113,7 +113,22 @@ async def refresh_token(
             detail="Invalid refresh token",
         )
 
-    user_id = payload.get("sub")
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+
+    # Convert string to UUID
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -124,11 +139,11 @@ async def refresh_token(
         )
 
     access_token = create_access_token(subject=str(user.id))
-    refresh_token = create_refresh_token(subject=str(user.id))
+    new_refresh_token = create_refresh_token(subject=str(user.id))
 
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token,
+        "refresh_token": new_refresh_token,
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }

@@ -1,7 +1,6 @@
 """Rule engine for evaluating trading conditions."""
 
 import logging
-from decimal import Decimal
 from typing import Any
 
 import pandas as pd

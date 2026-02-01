@@ -21,12 +21,12 @@ import { Alert, AlertDescription, AlertIcon } from '@/components/ui/alert'
 import { RuleBuilder } from '@/components/dashboard/rule-builder'
 import { useCreateStrategy, useUpdateStrategy } from '@/hooks/use-strategies'
 import { TIMEFRAMES } from '@/lib/constants'
-import { Strategy, Rule } from '@/types/strategy'
+import { Strategy, RuleDefinition } from '@/types/strategy'
 
 const strategySchema = z.object({
   name: z.string().min(1, 'Strategy name is required'),
   description: z.string().optional(),
-  symbol: z.string().min(1, 'Symbol is required'),
+  symbols: z.string().min(1, 'Symbol is required'),
   timeframe: z.string().min(1, 'Timeframe is required'),
 })
 
@@ -36,13 +36,29 @@ interface StrategyFormProps {
   strategy?: Strategy
 }
 
+const defaultRules: RuleDefinition = {
+  conditions: [],
+  logic: 'and',
+}
+
 export function StrategyForm({ strategy }: StrategyFormProps) {
   const router = useRouter()
   const createStrategy = useCreateStrategy()
   const updateStrategy = useUpdateStrategy()
 
   const [error, setError] = useState<string | null>(null)
-  const [rules, setRules] = useState<Rule[]>(strategy?.rules || [])
+  
+  // Parse rules from strategy or use default
+  const parseRules = (): RuleDefinition => {
+    if (!strategy?.rules) return defaultRules
+    const rulesObj = strategy.rules as unknown as RuleDefinition
+    return {
+      conditions: Array.isArray(rulesObj?.conditions) ? rulesObj.conditions : [],
+      logic: rulesObj?.logic || 'and',
+    }
+  }
+  
+  const [rules, setRules] = useState<RuleDefinition>(parseRules())
 
   const {
     register,
@@ -55,7 +71,7 @@ export function StrategyForm({ strategy }: StrategyFormProps) {
     defaultValues: {
       name: strategy?.name || '',
       description: strategy?.description || '',
-      symbol: strategy?.symbol || '',
+      symbols: strategy?.symbols?.join(', ') || '',
       timeframe: strategy?.timeframe || '1h',
     },
   })
@@ -66,15 +82,17 @@ export function StrategyForm({ strategy }: StrategyFormProps) {
     try {
       setError(null)
       const strategyData = {
-        ...data,
-        rules,
-        status: 'draft' as const,
+        name: data.name,
+        description: data.description,
+        symbols: data.symbols.split(',').map(s => s.trim()),
+        timeframe: data.timeframe,
+        rules: rules as unknown as Record<string, unknown>,
       }
 
       if (strategy) {
-        await updateStrategy.mutateAsync({ id: strategy.id, data: strategyData })
+        await updateStrategy.mutateAsync({ id: strategy.id, data: strategyData as Partial<Strategy> })
       } else {
-        await createStrategy.mutateAsync(strategyData)
+        await createStrategy.mutateAsync(strategyData as Partial<Strategy>)
       }
 
       router.push('/dashboard/strategies')
@@ -110,14 +128,14 @@ export function StrategyForm({ strategy }: StrategyFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="symbol">Symbol</Label>
+              <Label htmlFor="symbols">Symbols (comma-separated)</Label>
               <Input
-                id="symbol"
-                placeholder="BTCUSDT"
-                {...register('symbol')}
+                id="symbols"
+                placeholder="BTCUSDT, ETHUSDT"
+                {...register('symbols')}
                 disabled={isSubmitting}
               />
-              {errors.symbol && <p className="text-sm text-destructive">{errors.symbol.message}</p>}
+              {errors.symbols && <p className="text-sm text-destructive">{errors.symbols.message}</p>}
             </div>
           </div>
 

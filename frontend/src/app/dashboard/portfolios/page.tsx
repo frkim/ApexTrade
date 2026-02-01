@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PortfolioCard } from '@/components/dashboard/portfolio-card'
