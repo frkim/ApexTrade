@@ -3,21 +3,18 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm with pinned version for reproducible builds
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-
 # Copy package files
-COPY package.json ./
+COPY package.json package-lock.json* ./
 
-# Install dependencies (without lockfile since we use npm in dev)
-RUN pnpm install
+# Install dependencies
+RUN npm ci
 
 # Copy source files
 COPY . .
 
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build
+RUN npm run build
 
 # Production stage
 FROM node:22-alpine AS runner

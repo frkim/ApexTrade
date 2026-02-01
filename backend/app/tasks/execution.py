@@ -4,7 +4,7 @@ import logging
 from decimal import Decimal
 from typing import Any
 
-from app.celery_app import celery_app
+from app.core.celery_app import celery_app
 from app.core.database import async_session_factory
 from app.core.events import EventTypes, event_bus
 from app.services.execution_service import ExecutionService

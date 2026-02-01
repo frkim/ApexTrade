@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from app.celery_app import celery_app
+from app.core.celery_app import celery_app
 from app.core.events import EventTypes, event_bus
 from app.services.market_data_service import MarketDataService
 
