@@ -13,7 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core.database import async_session_factory
 from app.core.security import create_access_token, get_password_hash
 from app.main import app
 from app.models import Base
@@ -142,7 +141,6 @@ def sample_portfolio_data() -> dict[str, Any]:
 @pytest.fixture
 def sample_ohlcv_data() -> list[dict[str, Any]]:
     """Sample OHLCV data for testing."""
-    import pandas as pd
     from datetime import datetime, timedelta
 
     data = []
