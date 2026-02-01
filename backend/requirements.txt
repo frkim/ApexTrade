@@ -1,0 +1,43 @@
+# Core dependencies
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+email-validator>=2.0.0
+
+# Database
+sqlalchemy[asyncio]>=2.0.25
+asyncpg>=0.29.0
+alembic>=1.13.0
+
+# Redis & Celery
+redis>=5.0.0
+celery>=5.3.0
+
+# Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# HTTP client
+httpx>=0.26.0
+
+# Trading & Data
+ccxt>=4.2.0
+pandas>=2.1.0
+numpy>=1.26.0
+
+# File uploads
+python-multipart>=0.0.6
+
+# Optional: Stock data
+yfinance>=0.2.36
+alpaca-py>=0.14.0
+
+# Development dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+aiosqlite>=0.19.0
+ruff>=0.1.0
+mypy>=1.8.0
+black>=24.1.0

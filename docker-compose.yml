@@ -1,0 +1,321 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Reverse Proxy
+  # =============================================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: apextrade-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - frontend
+      - api
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # Frontend - Next.js
+  # =============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: apextrade-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - apextrade-network
+    depends_on:
+      - api
+
+  # =============================================================================
+  # Backend - FastAPI
+  # =============================================================================
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apextrade-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-jwt-secret-change-in-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://apextrade:apextrade@postgres:5432/apextrade}
+      - TIMESCALE_URL=${TIMESCALE_URL:-postgresql://apextrade:apextrade@timescaledb:5432/apextrade_timeseries}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - ALPACA_API_KEY=${ALPACA_API_KEY:-}
+      - ALPACA_SECRET_KEY=${ALPACA_SECRET_KEY:-}
+      - POLYGON_API_KEY=${POLYGON_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    networks:
+      - apextrade-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # =============================================================================
+  # Celery Workers
+  # =============================================================================
+  worker-backtest:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apextrade-worker-backtest
+    command: celery -A app.core.celery_app worker -Q backtest -l info --concurrency=2
+    environment:
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://apextrade:apextrade@postgres:5432/apextrade}
+      - TIMESCALE_URL=${TIMESCALE_URL:-postgresql://apextrade:apextrade@timescaledb:5432/apextrade_timeseries}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - ./backend:/app
+    networks:
+      - apextrade-network
+    depends_on:
+      - api
+      - redis
+      - postgres
+
+  worker-strategy:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apextrade-worker-strategy
+    command: celery -A app.core.celery_app worker -Q strategy -l info --concurrency=2
+    environment:
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://apextrade:apextrade@postgres:5432/apextrade}
+      - TIMESCALE_URL=${TIMESCALE_URL:-postgresql://apextrade:apextrade@timescaledb:5432/apextrade_timeseries}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - ./backend:/app
+    networks:
+      - apextrade-network
+    depends_on:
+      - api
+      - redis
+      - postgres
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apextrade-celery-beat
+    command: celery -A app.core.celery_app beat -l info
+    environment:
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://apextrade:apextrade@postgres:5432/apextrade}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+    volumes:
+      - ./backend:/app
+    networks:
+      - apextrade-network
+    depends_on:
+      - api
+      - redis
+
+  # =============================================================================
+  # Databases
+  # =============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: apextrade-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-apextrade}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-apextrade}
+      - POSTGRES_DB=${POSTGRES_DB:-apextrade}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-apextrade} -d ${POSTGRES_DB:-apextrade}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: apextrade-timescaledb
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=${TIMESCALE_USER:-apextrade}
+      - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD:-apextrade}
+      - POSTGRES_DB=${TIMESCALE_DB:-apextrade_timeseries}
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALE_USER:-apextrade} -d ${TIMESCALE_DB:-apextrade_timeseries}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Cache & Message Broker
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: apextrade-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Object Storage
+  # =============================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: apextrade-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # =============================================================================
+  # Monitoring
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: apextrade-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - apextrade-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: apextrade-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - apextrade-network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  apextrade-network:
+    driver: bridge
+    name: apextrade-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    name: apextrade-postgres-data
+  timescale_data:
+    name: apextrade-timescale-data
+  redis_data:
+    name: apextrade-redis-data
+  minio_data:
+    name: apextrade-minio-data
+  prometheus_data:
+    name: apextrade-prometheus-data
+  grafana_data:
+    name: apextrade-grafana-data

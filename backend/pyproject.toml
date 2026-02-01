@@ -1,0 +1,165 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apextrade"
+version = "1.0.0"
+description = "ApexTrade - Algorithmic Trading Platform"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+    { name = "ApexTrade Team", email = "team@apextrade.io" }
+]
+keywords = ["trading", "algorithmic-trading", "backtesting", "fastapi"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "email-validator>=2.0.0",
+    "sqlalchemy[asyncio]>=2.0.25",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+    "redis>=5.0.0",
+    "celery>=5.3.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "httpx>=0.26.0",
+    "ccxt>=4.2.0",
+    "pandas>=2.1.0",
+    "numpy>=1.26.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "aiosqlite>=0.19.0",
+    "ruff>=0.1.0",
+    "mypy>=1.8.0",
+    "black>=24.1.0",
+    "pre-commit>=3.6.0",
+]
+
+stocks = [
+    "yfinance>=0.2.36",
+    "alpaca-py>=0.14.0",
+]
+
+all = [
+    "apextrade[dev,stocks]",
+]
+
+[project.urls]
+Homepage = "https://github.com/apextrade/apextrade"
+Documentation = "https://docs.apextrade.io"
+Repository = "https://github.com/apextrade/apextrade"
+
+[project.scripts]
+apextrade = "app.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "B904",   # raise without from inside except
+    "ARG001", # unused function argument
+    "ARG002", # unused method argument
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+    "ccxt.*",
+    "celery.*",
+    "redis.*",
+    "passlib.*",
+    "jose.*",
+]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "app/tasks/*",
+    "app/celery_app.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
