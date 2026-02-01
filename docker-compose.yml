@@ -5,7 +5,7 @@ services:
   # Reverse Proxy
   # =============================================================================
   nginx:
-    image: nginx:1.25-alpine
+    image: nginx:1.27-alpine
     container_name: apextrade-nginx
     ports:
       - "80:80"
@@ -168,7 +168,7 @@ services:
   # Databases
   # =============================================================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: apextrade-postgres
     ports:
       - "5432:5432"
@@ -187,7 +187,7 @@ services:
       retries: 5
 
   timescaledb:
-    image: timescale/timescaledb:latest-pg16
+    image: timescale/timescaledb:latest-pg17
     container_name: apextrade-timescaledb
     ports:
       - "5433:5432"
@@ -209,7 +209,7 @@ services:
   # Cache & Message Broker
   # =============================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: apextrade-redis
     ports:
       - "6379:6379"
@@ -251,7 +251,7 @@ services:
   # Monitoring
   # =============================================================================
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:v2.53.0
     container_name: apextrade-prometheus
     ports:
       - "9090:9090"
@@ -273,7 +273,7 @@ services:
       retries: 3
 
   grafana:
-    image: grafana/grafana:10.1.0
+    image: grafana/grafana:11.0.0
     container_name: apextrade-grafana
     ports:
       - "3001:3000"
