@@ -5,17 +5,17 @@ import pandas as pd
 import pytest
 
 from app.utils.indicators import (
-    calculate_sma,
-    calculate_ema,
-    calculate_rsi,
-    calculate_macd,
-    calculate_bollinger_bands,
-    calculate_atr,
-    calculate_stochastic,
-    calculate_williams_r,
     calculate_adx,
+    calculate_atr,
+    calculate_bollinger_bands,
+    calculate_ema,
+    calculate_macd,
     calculate_obv,
+    calculate_rsi,
+    calculate_sma,
+    calculate_stochastic,
     calculate_vwap,
+    calculate_williams_r,
 )
 
 

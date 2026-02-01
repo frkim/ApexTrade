@@ -1,8 +1,9 @@
 """Unit tests for rule engine."""
 
+from datetime import datetime, timedelta
+
 import pandas as pd
 import pytest
-from datetime import datetime, timedelta
 
 from app.services.rule_engine import RuleEngine
 
