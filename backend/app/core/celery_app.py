@@ -23,11 +23,13 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_track_started=True,
+    # Task timeout: 1 hour hard limit, 55 min soft limit for graceful shutdown
     task_time_limit=3600,
     task_soft_time_limit=3300,
     worker_prefetch_multiplier=1,
     task_acks_late=True,
     task_reject_on_worker_lost=True,
+    # Results expire after 24 hours
     result_expires=86400,
     beat_schedule={
         "evaluate-active-strategies": {
